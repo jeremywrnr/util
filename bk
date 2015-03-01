@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# bk - by jeremy warner
+# create .bak version of files
+
+# check if no args provided
+if [ $# == 0 ]; then
+    echo "bk -> please enter files to create backups of."
+    echo "bk -r -> restore backup to original filename."
+    exit 1
+fi
+
+for arg; do
+    if [[ "$arg" = "-r" ]]; then
+        RESTORE="true"
+    elif [[ $RESTORE ]]; then
+        TARGET=$(basename "$arg")
+        mv -v "$arg" "${TARGET%.*}"
+    else
+        cp -v "$arg" "$arg.bak"
+    fi
+done

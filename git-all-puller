@@ -1,0 +1,73 @@
+#!/bin/bash
+
+
+# puller - a git tool by jeremy warner
+# cycle through subfolders, run git-up
+# (git up is a ruby gem for updating repos)
+
+
+# check if verbose should run
+for arg; do if [[ $arg == "-v" ]]; then verbose="true"; fi done
+
+
+function git-upper # loop over folders, run git up
+{
+    find . -type d -name ".git"\
+        -exec dirname {} \;\
+        -exec sh -c '(cd "{}/.." && yes | git-up)' \;
+}
+
+
+# sed terminal colors
+RST=`echo -e "\033[0;0m"`
+RED=`echo -e "\033[0;31m"`
+GRN=`echo -e "\033[0;32m"`
+CYN=`echo -e "\033[0;36m"`
+UCY=`echo -e "\033[4;36m"`
+WHT=`echo -e "\033[6;97m"`
+
+# all repos start with ./ from the find command
+
+function gup-parser # parsing pipeline, clean n color output
+{
+    sed -n -e "
+    /^\.\//{
+        # print out the current repo
+        s_\.\/\(.*\)_$CYN\[\1\]${RST}_
+        :a
+        N
+        # mute git repo errors
+        /.*fatal:.*/{
+            s_\(.*\)\nfatal:\(.*\)_\1$RED\[\2\]${RST}_
+            b a
+        }
+        # mute fetching notification
+        /.*Fetching.*/{
+            s_\(.*\)\nFetching.*_\1_
+            b a
+        }
+        # mute stashing notification
+        /.*stashing.*/{
+            s_\(.*\)\n.*stashing.*_\1_
+            b a
+        }
+        # join line for the first branch
+        s_\(.*\)\n\([^ ]*\) \(.*\)_$WHT\[\2\]\1 \3_
+    }
+    # print anything that exists
+    /./p
+    "
+}
+
+
+# loop over all folders, run git pull
+printf "Starting in $UCY$PWD...$RST\n\n"
+if [[ $verbose == "true" ]]; then
+    git-upper
+else
+    git-upper | gup-parser
+fi
+
+# cleanup format
+printf "\n$RST"
+

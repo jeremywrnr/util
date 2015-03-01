@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# hw - jeremy warner
+# script to pygmentize tools located in path
+
+printHighlight()
+{
+    pygmentize -g "$1"
+}
+
+testPrereq()
+{
+    testing="$1"
+    type $testing >/dev/null 2>&1 || {
+    echo "$testing is not installed, please install before running" >&2
+    echo "pip3 install Pygments"
+    exit 1
+}
+}
+
+# Check if has prereq
+testPrereq 'pygmentize'
+
+for arg; do
+
+    TOOL=$(which "$arg")
+    if [[ $? > 0 ]]; then
+        # tool not found, look locally
+        printHighlight "$arg"
+    else
+        # otherwise print tool from path
+        printHighlight "$TOOL"
+    fi
+
+done
+

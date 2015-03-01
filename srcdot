@@ -1,11 +1,18 @@
 #!/bin/bash
 
-# by jeremy warner
-# dotfile management script, -c copies instead of links
+# dot - jeremy warner
+# dotfile management script
+# -c copies instead of links
+# -b = backup, -h (options)
 
 # grab all dotfiles
-dotfiles=(gitconfig tmux.conf vimrc zshrc)
-DFPATH=$(cd "${0%/*}/.."; pwd)
+DFPATH=~/Documents/Code/dotfiles
+
+# dynamically load all dotfiles
+dotfiles=$(ls $DFPATH | grep -Ev 'etc|readme|oh-my-zsh|vim$')
+
+# dynamic way to get runtime folder
+TOOLPATH=$(cd "${0%/*}/"; pwd)
 
 # check cl args: -c = copy, -b = backup, -h message
 for arg; do
@@ -24,7 +31,7 @@ for arg; do
 
 done
 
-# if -c specified, copy instead
+# if -c specified, copy files to ~
 if [[ $COPY ]]; then
 
     printf "\nCopying dotfiles from source to home...\n\n"
@@ -43,6 +50,7 @@ else # else link them to home directory
 
 fi
 
-# move the vim directory (yay bundles)
-printf "\nCopying .vim folder to home directory...\n\n"
+# move the vim and zsh directory (yay themes and bundles)
+printf "\nCopying .oh-my zsh, vim folders to home dir...\n\n"
+cp -a $DFPATH/oh-my-zsh/. ~/.oh-my-zsh/
 cp -a $DFPATH/vim/. ~/.vim/

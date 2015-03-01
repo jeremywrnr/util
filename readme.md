@@ -1,49 +1,73 @@
 utility scripts
-==============
+===============
+
+I keep several scripts here that are made to help me accomplish tasks more
+quickly. These tasks include setting up dotfiles on a new machine, sourcing
+dotfiles, scripts for working with git, and generic file handling scripts.
 
 acp:
 
     add commit and push all changes in current repo
 
-clean_filenames:
+bk:
 
-    remove a pattern from filenames in cd
+    make or restore backups of files (copy with a .bk)
 
-clean_usb:
+clean-usb:
 
     clean all the junk from mac/win usb plugs
-
-cpall:
-
-    cp all files just with certain extension (perl)
 
 cw:
 
     print out source code of any script in path
 
-dot:
+srcdot:
 
     source all of my dotfiles to my home folder
+
+dudir:
+
+    show the size of folders files (recursive)
+
+fcp:
+
+    git add, commit, and push all arguments
+
+git-reset-repo:
+
+    DANGER: get rid of all git commit history, make new repo with single commmit
 
 gac:
 
     git add and commit without pushing, good for local
 
-mvext:
+gem-reinstaller:
 
-    mv all files with a certain extension (perl)
+    reintall all ruby gems on system (takes a long time)
 
-photo_rename:
+modname:
 
-    rename all jpgs in cwd to date taken, or string
+    tool to quickly rename files, extensions, or parts of files
+
+mvup:
+
+    all contents of a folder up one dir, then remove that original folder
+
+net:
+
+    keep trying to ping google til the internet is back (perl)
+
+pand:
+
+    a wrapper for common pandoc commands
 
 pull:
 
     loop through all git repos and pull (good in Github folder)
 
-remote_push:
+remote-setter:
 
-    push files to git repo and commit them (perl)
+    change git remotes to be on github or bb, and ssh or https
 
 rmfolder:
 
@@ -53,14 +77,19 @@ status:
 
     loop through all git repos and check status
 
+tarr:
+
+    a wrapper for common tar functions
+
+ts:
+
+    show a visual size for estimating terminal size
+
 vimrc:
 
     script to open up, edit, then commit and src vimrc
 
-web:
-
-    cli interface for google chrome for osx
-
-zshrc:
+zshrc-update:
 
     script to open up, edit, then commit and src zshrc
+

@@ -11,7 +11,7 @@ list=
 
 help_msg(){
     echo "usage: tarr <command> <target>"
-    echo "	ls			list files inside tarball"
+    echo "	ls		list files inside tarball"
     echo "	c|comp		compress target folder"
     echo "	d|decomp	decompress target tarball"
     echo "	h|help		show help and quit"
@@ -42,7 +42,6 @@ if [[ $compress ]]; then
     ext=".tar.bz2"
     out="$target$ext"
     tar cvfj "$out" "$target"
-    rmfolder "$target"
 
 elif [[ $decompress ]]; then
     tar -xvf "$target"

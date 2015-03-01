@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+DFPATH=$HOME/Documents/Code/dotfiles
+
+cd $DFPATH
+vim zshrc
+git add zshrc
+git commit -v
+ln -Fsv $DFPATH/zshrc ~/.zshrc
+git push origin main
+cd -
+
+printf "\nzshrc update complete.\n"

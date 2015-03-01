@@ -1,4 +1,0 @@
-#!/bin/sh
-tmux new-session -d 'vim'
-tmux split-window -h -p 40 'zsh'
-tmux -2 attach-session -d

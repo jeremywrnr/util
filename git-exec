@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+# git-exec - a git tool by jeremy warner
+# cycle through subfolders, execute command there
+
+function ge-usage # show user how to use tool
+{
+    echo "error: argument expected."
+    echo "git-exec usage:"
+    echo "	git-exec 'cmd 1' 'cmd 2'"
+    exit 1
+}
+
+# sed terminal colors
+RESET=`echo -e "\033[0;0m"`
+GREEN=`echo -e "\033[0;32m"`
+PURPL=`echo -e "\033[0;35m"`
+CYAN=`echo -e "\033[0;36m"`
+UCYAN=`echo -e "\033[4;36m"`
+
+# check if no args provided
+[ $# == 0 ] && ge-usage
+
+cmd=
+for arg; do
+    if [[ -z $filelist ]]
+    then cmd="$arg"
+    else cmd="$cmd && $arg"
+    fi
+done
+
+cmdwrapper="(cd '{}'/.. && $cmd)"
+
+
+function git-repo-cmd # loop over folders, run users command
+{
+    find . -type d -name ".git" -exec sh -c "$cmdwrapper" \;
+}
+
+# parse out the number of hours from a repo using clock
+clocker="(cd {} && clock -c | sed -ne '/--*/{n;p;}' | sed -e 's/^[ \t]*\(.*\) hrs/\1/')"
+
+function git-repo-clocker # loop over folders, run clocker
+{
+    find . -type d -name ".git" -exec sh -c "$clocker" \;
+}
+
+git-repo-cmd
+
+# how to print a new line in osx sed:
+#s_\(.*\)_\1\\`echo -e '\n\r'`_

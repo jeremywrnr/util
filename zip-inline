@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo "Compressing $1"
+
+ffmpeg -i "$1" -v 0 -vsync 2 -q:a 0 "$1.reducedrate.mp3" \
+    && mv -vf "$1.reducedrate.mp3" "$1"

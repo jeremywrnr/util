@@ -1,6 +1,0 @@
-#!/bin/sh
-tmux new-session -d 'ksh'
-tmux split-window -h -p 20 'ksh'
-tmux select-pane -L
-tmux split-window -h -p 75 'vim'
-tmux -2 attach-session -d

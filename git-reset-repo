@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# reset the commit history of the current branch
+
+branch=`git rev-parse --abbrev-ref HEAD`
+git checkout --orphan goodbyecruelworld
+git add -A
+git commit -am 'init'
+git branch -D $branch
+git branch -m $branch

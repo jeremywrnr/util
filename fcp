@@ -13,12 +13,13 @@ fi
 filelist=
 for arg; do
     git add "$arg"
-    if [[ -z $filelist ]]; then filelist="$arg"
+    if [[ -z $filelist ]]
+    then filelist="$arg"
     else filelist="$filelist $arg"
     fi
 done
 
-git commit
+git commit -v
 
 branch=`git rev-parse --abbrev-ref HEAD`
 git push origin "$branch"

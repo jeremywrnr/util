@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# by jeremy warner
+# compress a folder from the command line without double specifying it
+# optionally, include a list of folders and it will create a zip for each
+
+for arg; do
+
+    if [[ -d $arg ]]; then
+        echo "Zipping $arg..."
+        zip -r "$arg.zip" $arg
+    else
+        echo "$arg is not a folder, ignoring."
+    fi
+
+done

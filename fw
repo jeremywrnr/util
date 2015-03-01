@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+require 'colored'
+
+# fw - filewatcher helper
+# starting filewatcher w/ clear
+# by jeremy warner, jan 2016
+
+FWHELP = <<-FWHELP
+fw is an helper tool for the ruby gem filewatcher.
+
+FEATURES
+- no need to quote argmuments by default
+- clears screen of output after each run
+- easier ruby development (**/*rb)
+
+USAGE
+(fw rake) - watch all ruby files, run rake when saved
+(fw -f "**/*.c" -c make) - watch all c, recompile c
+(fw -f test.js -c node test.js) - watch test.js, rerun
+
+NOTES
+if you are using the default file matcher, you don't have to use the -c flag.
+also, all the arguments will be parsed and joined, so you dont have to quote
+them. by default it listens for saves in all ruby files. you can specify a list
+files with the -f flag:
+
+  -f '**/*.c'
+
+then, specify which command to do with the -c flag:
+
+  -c make
+
+FWHELP
+
+# parse args, generate list of files and command.
+fileset = false
+cmdset = true
+files = []
+cmds = []
+ARGV.each do |a|
+  if a == '-f'
+    fileset = true
+    cmdset = false
+  elsif a == '-c'
+    fileset = false
+    cmdset = true
+  elsif fileset
+    files << a
+  elsif cmdset
+    cmds << a
+  end
+end
+
+# contstructing which files to watch
+if files.empty?
+  files = "**/*.rb"
+else
+  files = files.join ' '
+end
+
+# starting filewatcher
+if cmds.empty?
+  puts "please enter a command for fw/filewatcher, or show help (-h)"
+
+elsif cmds.first == '-h'
+  puts FWHELP
+
+else # multipart command given
+  cmd = cmds.join ' '
+  banner =  'executing: '.green << cmd << "\non saving: ".green << files
+  puts banner
+  exec "filewatcher", files, "clear && echo '#{banner}' && #{cmd}"
+end
+

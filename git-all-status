@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# status - a git tool by jeremy warner
+# cycle through subfolders, run git status, cleanup
+
+# check if verbose or long
+for arg; do if [[ $arg == "-v" ]]; then verbose="true"; fi; done
+
+function git-stat # loop over folders, run git status
+{
+    find . -type d -name ".git"\
+        -exec dirname {} \;\
+        -exec git --git-dir={} --work-tree="$PWD"/{}/.. status -s -b \;\
+        -exec printf "\n" \;
+}
+
+# sed terminal colors
+RESET=`echo -e "\033[0;0m"`
+GREEN=`echo -e "\033[0;32m"`
+PURPL=`echo -e "\033[0;35m"`
+CYAN=`echo -e "\033[0;36m"`
+UCYAN=`echo -e "\033[4;36m"`
+
+function git-parser # parsing pipeline, clean n color output
+{
+    sed -n -e "
+    /^\.\//{
+        # print out the current repo
+        s_^\.\/\(.*\)_$GREEN\[\1\]${RESET}_
+        N
+        # mute git repo error
+        /fatal: Not a git repository/{
+            d
+            b
+        }
+        # omit master/main branch
+        s_\(.*\)\#\# master.*_\1_g
+        s_\(.*\)\#\# main.*_\1_g
+        # hide ...remote label
+        s_\(.*\)\#\# \(.*\)\.\.\..*_\1 $CYAN\[\2\]${RESET}_g
+        # show other branches
+        s_\(.*\)\#\# \(.*\)_\1 $CYAN\[\2\]${RESET}_g
+        # trim extra newlines
+        s_\(.*\)\n\$_\1_
+    }
+    # print anything, if we have it
+    /./p
+    "
+}
+
+# loop over all folders, run git status
+printf "Starting in $UCYAN$PWD...$RESET\n\n"
+if   [[ $verbose == "true" ]]; then
+    git-stat
+else
+    git-stat | git-parser
+fi
+
+# cleanup format
+printf "\n$RESET"

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for f in "$@"; do
+    [[ "$f" != *.mp4 ]] && continue
+    echo "Converting $f..."
+    ffmpeg -i "$f" -y "${f%.mp4}.gif"
+done

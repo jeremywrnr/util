@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Tool for removing the .DS_Store files that OSX inserts in new folders by
+# default. Run with no arg to clear out files from the folder you are in
+# currently, or pass in an arg to run from that specific folder.
+
+if [ $# == 0 ]; then
+    dir="$(pwd)"
+else
+    dir="$1"
+fi
+
+if [ -d "$dir" ]; then
+    echo "Searching: $dir"
+    find "$dir" -type f -iname .DS_Store -exec rm -v {} \;
+else
+    echo "directory $dir does not exist"
+fi
