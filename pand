@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# pand - jeremy warner, feb 2015
+# using pandoc to convert mi docs
+
+# flags
+target=
+dp=
+xp=
+dm=
+xm=
+dp=
+xp=
+mp=
+mt=
+mb=
+
+help_msg(){
+    echo "usage: pand [-opts] <command> <target>"
+    echo "Commands:"
+    echo "	dp		doc to pdf"
+    echo "	xp		docx to pdf"
+    echo "	dm		doc to md"
+    echo "	xm		docx to md"
+    echo "	mp		md to pdf"
+    echo "	mt		md to tex"
+    echo "	mb		md to beamer"
+    echo "	help	show this list"
+    echo "Options:"
+    echo "	-d		delete source on completion"
+    echo "	-s		link pand to /usr/local/bin"
+    echo "pand - a pandoc tool helper"
+    exit 0
+}
+
+# exit if no args are provided
+[ $# == 0 ] && help_msg
+
+pandoc_msg(){
+    echo The pandoc document converter is needed but not installed, see:
+    echo http://johnmacfarlane.net/pandoc/installing.html
+    exit 1
+}
+
+# exit if pandoc not installed
+pandocloc=`which pandoc`
+[ $? != 0 ] && pandoc_msg
+
+# parse args
+for arg; do
+    if [[ $arg == "dp" ]]; then dp=1
+    elif [[ $arg == "xp" ]]; then xp=1
+    elif [[ $arg == "dm" ]]; then dm=1
+    elif [[ $arg == "xm" ]]; then xm=1
+    elif [[ $arg == "mp" ]]; then mp=1
+    elif [[ $arg == "mt" ]]; then mt=1
+    elif [[ $arg == "mb" ]]; then mb=1
+    elif [[ $arg == "-d" ]]; then delete=1
+    elif [[ $arg == "-s" ]]; then ln -vf pand /usr/local/bin/pand
+    elif [[ $arg == "help" ]]; then help_msg
+    elif [[ -z $target ]]; then target="$arg"
+    else target="$target $arg"
+    fi
+done
+
+# check to see any valid commands matched, else exit
+! [[ $dp || $xp || $mp || $mt || $mb ]] && help_msg
+
+# handle pandoc cases below
+
+# used for standard write procedure
+transform(){
+    pandoc -s "$1" -o "$2"
+}
+
+# ms office doc/docx to pdf
+if [[ $dp || $xp ]]; then
+    [ $dp ] && out="`basename $target .doc`.pdf"
+    [ $xp ] && out="`basename $target .docx`.pdf"
+    pandoc -s "$target" -t markdown -o temp.md
+    pandoc temp.md -o "$out"
+    rm temp.md
+fi
+
+# ms office doc/docx to markdown
+if [[ $dm || $xm ]]; then
+    [ $dm ] && out="`basename $target .doc`.md"
+    [ $xm ] && out="`basename $target .docx`.md"
+    pandoc -s "$target" -t markdown -o "$out"
+fi
+
+# markdown to pdf or beamer
+if [[ $mp || $mb ]]; then
+    out="`basename $target .md`.pdf"
+    [ $mp ] && transform "$target" "$out"
+    [ $md ] && pandoc -t beamer "$target" -o "$out"
+fi
+
+# markdown to tex
+if [[ $mt ]]; then
+    out="`basename $target .md`.tex"
+    transform "$target" "$out"
+fi
+
+# tex to markdown
+if [[ $tm ]]; then
+    out="`basename $target .tex`.md"
+    transform "$target" "$out"
+fi
+
+# delete source if requested
+[ $delete ] && rm "$target"
+
+# once wrapped up, show off files
+echo Conversion complete: $target -\> $out
+open "$out"
+

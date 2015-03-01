@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# pull - a git tool by jeremy warner
+# cycle through subfolders, run git pull, cleanup
+
+for arg; do
+    if [[ $arg == "-v" ]]; then
+        verbose="true"
+    fi
+done
+
+printf "Starting in $PWD...\n\n"
+
+# pull in all folders and show all output. good for parsing help
+if [[ $verbose == "true" ]]; then
+    find . -type d -depth 1 -exec printf "\n{}\n" \;\
+        -exec git --git-dir={}/.git --work-tree="$PWD"/{} pull \;
+    echo "Verbose pull complete."
+    exit 0
+fi
+
+find . -type d -depth 1\
+    -exec printf "\n{}\n" \;\
+    -exec git --git-dir={}/.git --work-tree="$PWD"/{} pull \; 2>&1 |\
+sed -n -e "
+/^\.\//{
+    # print out the current repo
+    s_\.\/\(.*\)_\[\1\]_
+    N
+    # mute git repo error
+    /fatal: Not a git repository:/d
+    # print out the current status (ok), or show name and changes
+    /Already up-to-date/{
+        s_\(.*\)\nAlready up-to-date._\[ok\]\1_
+    }
+}
+# print anything, if we have it
+/./p
+"
+
+# cleanup format
+printf "\n"

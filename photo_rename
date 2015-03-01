@@ -1,0 +1,131 @@
+#!/usr/bin/perl
+
+# script to sequentially rename photos
+# author: Jeremy Warner, sep 2014
+
+use strict;
+use Cwd;
+use POSIX;
+use File::stat;
+use DateTime;
+#use Image::ExifTool qw(:Public);
+
+my $groupName;
+my %toRename;
+my %lastPhoto;
+my $loopCount = 0;
+&main();
+
+sub main{
+
+    # check for a grouping option passed in
+    $groupName = join ' ', @ARGV;
+    if ($groupName) {
+        #chdir $groupName;
+        print "Renaming all in ".&getcwd()." to:\n\t$groupName"."-#\n";
+    } else{
+        warn "Warning: no group name detected, switching to date scheme.\n";
+    }
+
+    # glob all jpg files to test
+    my @photos =  glob "*";
+
+    # looping over each folder
+    print "\nBeginning search for photos to rename...\n\n";
+    renamePhoto(@photos);
+
+    # after work done, confirm titles look good
+    print "[y/n] Please confirm renaming... ";
+    chomp(my $in = <STDIN>);
+    #$in = 'y';
+    if($in =~ /^y$/i){
+        for my $p (keys %toRename){
+            rename $p, $toRename{$p};
+        }
+        system "ls";
+        print "Operations completed.\n";
+        #system "chmod 644 *";
+    } else {
+        print "No files changed.\n";
+    }
+}
+
+# routine to rename photo
+sub renamePhoto{
+
+    # parse in photo file
+    my $photo = shift @_;
+    my $new = '';
+
+    # get the file extension
+    #print "found extension: $ext";
+    warn "No file extension found!\n"
+    unless($photo =~ m/.*(\..*$)/);
+    my $ext = $1;
+
+    if ($groupName){
+        $new = $groupName;
+    }
+    else{
+        # figure out when they were modded
+        my $stat = stat($photo) or die "No $photo $!\n";
+        my $now = DateTime->now;
+        my $mod = -M $photo;
+        my $days = floor($mod);
+        my $hours = 24*($mod - floor($mod));
+        my $hoursf = floor($hours);
+        my $minutes = 60*($hours - $hoursf);
+        my $minutesf = floor($minutes);
+        print "parsed time delta = (".$days."d-$hoursf:$minutesf)\n";
+
+        # make a new date from the difference
+        # tweaked to fix time zone difference...
+        my $then = $now->clone->subtract(
+            minutes => $minutesf + 1,
+            hours => $hoursf + 4,
+            days => $days,
+        );
+
+        $new = $then->ymd('-') . ' ' . $then->hms('.');
+    }
+
+    # begin actual renaming process
+    my $newPhoto = seqRename($new).$ext;
+
+    # notify and actually move file
+    print "\tFROM:\t$photo\n\t  TO:\t$newPhoto\n\n";
+
+    # if there are more photos, loop
+    renamePhoto(@_) if $#_ >= 0;
+    $toRename{$photo} = $newPhoto;
+
+    # setup exif stuff
+    #my $tool = Image::ExifTool->new();
+    #my $info = ImageInfo($photo, 'CircleOfConfustion' );
+    #my $origDate = $tool->GetValue('CircleOfConfusion');
+    #$tool->ExtractInfo($photo);
+    #my @tagList = $tool->GetFoundTags('File');
+    #print "\t$_\n" foreach @tagList;
+}
+
+
+# handle cases where files where edited at the same time
+sub seqRename{
+
+    # take in photo name
+    my $newPhoto = shift @_;
+
+    # if it exists, iterate the name
+    if($lastPhoto{$newPhoto}){
+        $newPhoto = "$newPhoto-$loopCount";
+        $loopCount++;
+    }else{
+        # register the time in the hash
+        $lastPhoto{$newPhoto} = 1;
+    }
+
+    # return name of the photo
+    return $newPhoto;
+
+}
+

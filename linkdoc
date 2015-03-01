@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#define folders to grab
+docs=~/Dropbox/docs/
+
+# link dropbox into docs
+for i in $(ls $docs); do
+    echo linking: $docs$i
+    ln -s $docs$i ~/Documents/
+done

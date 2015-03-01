@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+
+# script to move all files of a certain ext into a directory
+
+use 5.10.0;
+use strict;
+use File::Copy;
+use Cwd;
+
+# needs two args to properly function and complete
+die "ERROR:\n\targ1 = file-ext\n\targ2 = destination\n\targ3 = abs path boolean - optional\n"
+unless $#ARGV >= 1; # actually counts for two elements, zero indexed
+
+# parse in args from caller
+my ($ext, $newdir, $abs) = @ARGV;
+
+# if absolute specified use
+$newdir = &getcwd() .'/'. $newdir unless $abs;
+say "Source =\n\t" . &getcwd();
+say "Target =\n\t" . $newdir . "\n";
+
+# iterate over all files and move them
+foreach my $file ( glob "*.$ext" ) {
+	move("$file" , "$newdir/$file");
+	say "Moved $file";
+}
+
+say "Moving completed.\n";

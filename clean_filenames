@@ -1,0 +1,46 @@
+#!/usr/bin/perl -w
+
+# by jeremy warner
+# remove a phrase from all files' name in the cwd
+
+use strict;
+use File::Copy;
+
+# grab dirty phrase to remove files from
+my %transfer;
+my $dirty = join ' ', @ARGV ;
+die "Please provide phrase to remove (as command arg)\n"
+unless $dirty;
+
+# grab all the files from cwd
+my @files = glob "*";
+print "Planned file actions:\n\n";
+
+# loop over each file and replace the phrase
+foreach my $file (@files) {
+    my $oldName = $file;
+    next unless ($file =~ s/$dirty//i);
+    print "\tFROM: $oldName\n\t  TO: $file\n\n";
+    $transfer{$oldName} = $file;
+}
+
+# check if there are any actions to take
+my $number = keys %transfer;
+die "No matches for phrase: $dirty\n"
+unless $number;
+
+# check if the transform is acceptable, execute
+print "[y/n] Acceptable output? ";
+chomp(my $yn = <STDIN>);
+if ($yn =~ /y/i){
+    foreach my $f (keys %transfer){
+        move($f, $transfer{$f})
+            or die "Move failed: $!\n";
+    }
+
+# final wrap up, show current status
+    print "\nCurrent file status:\n\n";
+    system "ls";
+    print "\n";
+}
+

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# tarr - jeremy warner
+# because remembering tar options is impossible
+
+# flags
+decompress=
+compress=
+target=
+list=
+
+help_msg(){
+    echo "usage: tarr <command> <target>"
+    echo "	ls			list files inside tarball"
+    echo "	c|comp		compress target folder"
+    echo "	d|decomp	decompress target tarball"
+    echo "	h|help		show help and quit"
+    echo "tarr - tar tool helper"
+    exit 1
+}
+
+# check if no args are provided
+[ $# == 0 ] && help_msg
+
+# parse args
+for arg; do
+    if [[ $arg == "ls" ]]; then list=1
+    elif [[ $arg == "c" || $arg == "comp" ]]; then compress=1
+    elif [[ $arg == "d" || $arg == "decomp" ]]; then decompress=1
+    elif [[ $arg == "h" || $arg == "help" || $arg == "-h" ]]; then help_msg
+    elif [[ -z $target ]]; then target="$arg"
+    else target="$target $arg"
+    fi
+done
+
+# check to see any valid commands matched
+! [[ $compress || $decompress || $list ]] && help_msg
+
+# handle tar cases below
+
+if [[ $compress ]]; then
+    ext=".tar.bz2"
+    out="$target$ext"
+    tar cvfj "$out" "$target"
+    rmfolder "$target"
+
+elif [[ $decompress ]]; then
+    tar -xvf "$target"
+
+elif [[ $list ]]; then
+    tar -tvf "$target"
+fi
+

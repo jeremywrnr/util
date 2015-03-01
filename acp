@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# by jeremy warner
+# acp: (a)ll (c)ommit, (p)ush changes
+
+git status
+git add -A .
+git status
+git commit -va
+branch=`git rev-parse --abbrev-ref HEAD`
+git push origin "$branch"
+echo "Commit to $branch complete."

@@ -1,0 +1,31 @@
+#!/usr/bin/env perl
+
+use strict;
+use Time::HiRes qw( sleep );
+
+# check current network connection
+# q - quiet, c - packet count, t - timeout
+my $net = "ping -c 1 -t 3 google.com > /dev/null 2>&1";
+my $try = 0;
+
+# get current network information (NOT PORTABLE)
+my $wifi = `networksetup -getairportnetwork en0`;
+$wifi =~ s/.*: //; chomp($wifi);
+
+# first time entering loop
+print "Testing $wifi...\n";
+
+# keep testing until loop exited, success
+system($net);
+
+# if the host cannot be found look again
+while( ! ($? =~ /^(0|2)$/)){
+    # test every 500 ms
+    sleep(0.5); $try++;
+    printf "\tdown - %.1f (s)\r", ($try / 2);
+    system($net);
+}
+
+# finally, show status and/or downtime
+if ($try){ printf "Total downtime - %.1f (s).\n", ($try / 2); }
+print "System connection restored.\n";

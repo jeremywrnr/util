@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# mvup - jeremywrnr
+# mv contents of a folder up a dir and remove folder
+
+# exit if no args are provided
+if [[ $# == 0 ]]; then
+    echo Give folders to bring contents up a dir.
+    exit 1
+fi
+
+# get the target folder
+for arg; do
+
+    # move stuff up
+    cd "$arg"
+    mv * ../
+    cd ../
+
+    # clean it out
+    rmdir "$arg"
+
+done
+

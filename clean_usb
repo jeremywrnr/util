@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -v ._*
+rmfolder -f .Trashes .Spotlight-V100 .fseventsd

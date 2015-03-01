@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# status - a git tool by jeremy warner
+# cycle through subfolders, run git status, cleanup
+
+for arg; do
+    if [[ $arg == "-v" ]]; then
+        verbose="true"
+    fi
+done
+
+printf "Starting in $PWD...\n\n"
+
+# pull in all folders and show all output. good for parsing help
+if [[ $verbose == "true" ]]; then
+    find . -type d -depth 1\
+        -exec printf "{}\n" \;\
+        -exec git --git-dir={}/.git --work-tree"$PWD"/{} status \;\
+        -exec printf "\n" \;
+    echo "Verbose status complete."
+    exit 0
+fi
+
+find . -type d -depth 1\
+    -exec printf "{}\n" \;\
+    -exec git --git-dir={}/.git --work-tree="$PWD"/{} status \;\
+    -exec printf "\n" \; |\
+sed -n -e "
+/^\.\//{
+    # print out the current repo
+    s_^\.\/\(.*\)_\[\1\]_
+    N
+    # mute git repo error
+    /fatal: Not a git repository/{
+        d
+        b
+    }
+    N
+    # print branch if not master
+    /master/!{
+        s_\(.*\)\nOn branch \(.*\)_\1\ on \2_
+    }
+    /master/{
+        s_\(.*\)\nOn branch master_\1_
+    }
+    s_\(.*\)\nYour branch is up-to-date with .*_\[ok\]\1_
+    N
+    # filter out saying repo is clean if it is
+    s_\(.*\)\nnothing to commit, working directory clean.*_\1_
+}
+/./p
+"
+
+# how to print a new line in osx sed:
+#s_\(.*\)_\1\\`echo -e '\n\r'`_
+
+printf "\n"

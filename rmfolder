@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# by jeremy warner
+# script to show, and remove all files in a non-empty folder
+
+for arg; do
+
+    # check if flagged for FORCE
+    if [[ "$arg" = "-f" ]]; then
+        FORCE="true"
+        continue
+    fi
+
+    # check if flagged for VERBOSE
+    if [[ "$arg" = "-v" ]]; then
+        VERBOSE="true"
+        continue
+    fi
+
+    # print out folder structure to remove
+    printf "\nFolder to remove: $arg\n\n"
+
+    # remove folder FORCEfully, verbose
+    if [[ "$FORCE" = "true" && "$VERBOSE" = "true" ]]; then
+        rm -vrf "$arg"
+        continue
+    fi
+
+    # remove folder FORCEfully, quietly
+    if [[ "$FORCE" = "true" && "$VERBOSE" != "true" ]]; then
+        rm -rf "$arg"
+        continue
+    fi
+
+    # check if user wants to continue
+    tree -a "$arg"
+    printf "\n[y/n] Remove folder $arg? "
+    read DELETE;
+
+    # parse input and delete folder
+    if [[ "$DELETE" = "y" && "$VERBOSE" = "true" ]]; then
+        printf "\nRemoving $arg now...\n\n"
+        rm -vrf "$arg"
+        continue
+    elif [[ "$DELETE" = "y" && "$VERBOSE" != "true" ]]; then
+        printf "\nRemoving $arg now...\n\n"
+        rm -rf "$arg"
+        continue
+    else
+        printf "\nFolder $arg not deleted.\n\n"
+    fi
+
+done
+
+printf "Operations complete.\n\n"

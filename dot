@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# by jeremy warner
+# dotfile management script, -c copies instead of links
+
+# grab all dotfiles
+dotfiles=(gitconfig tmux.conf vimrc zshrc)
+DFPATH=$(cd "${0%/*}/.."; pwd)
+
+# check cl args: -c = copy, -b = backup, -h message
+for arg; do
+
+    if [[ "$arg" = "-c" ]]; then
+        COPY="true";
+    elif [[ "$arg" = "-b" ]]; then
+        mkdir -p $DFPATH/backup/
+        BKUP="true";
+    elif [[ "$arg" = "-h" ]]; then
+        printf "dot - dotfile management script. usage: \n";
+        printf "\t-c copy files instead of linking them\n";
+        printf "\t-b back up files into backup folder\n";
+        printf "\t-h display this message\n" && exit 1;
+    fi
+
+done
+
+# if -c specified, copy instead
+if [[ $COPY ]]; then
+
+    printf "\nCopying dotfiles from source to home...\n\n"
+    for dot in ${dotfiles[@]}; do
+        [[ $BKUP ]] && mv ~/.$dot $DFPATH/backup/$dot || rm -f ~/.$dot
+        cp -va $DFPATH/$dot  ~/.$dot
+    done
+
+else # else link them to home directory
+
+    printf "\nLinking dotfiles from source to home...\n"
+    for dot in ${dotfiles[@]}; do
+        [[ $BKUP ]] && mv ~/.$dot $DFPATH/backup/$dot || rm -f ~/.$dot
+        ln -Fsv $DFPATH/$dot  ~/.$dot
+    done
+
+fi
+
+# move the vim directory (yay bundles)
+printf "\nCopying .vim folder to home directory...\n\n"
+cp -a $DFPATH/vim/. ~/.vim/

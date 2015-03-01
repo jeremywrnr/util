@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# by jeremy warner
+# fcp: git (f)iles (c)ommit and (p)ush
+# can operate oon a list of files
+
+# check if no args provided
+if [ $# == 0 ]; then
+    echo "Enter files w/ changes to push as arguments."
+    exit 1
+fi
+
+filelist=
+for arg; do
+    git add "$arg"
+    if [[ -z $filelist ]]; then filelist="$arg"
+    else filelist="$filelist $arg"
+    fi
+done
+
+git commit
+
+branch=`git rev-parse --abbrev-ref HEAD`
+git push origin "$branch"
+echo "Commit to $branch complete."
