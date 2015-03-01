@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+# fw - filewatcher helper
+# script for starting filewatcher w/ clear
+# assumes **.*rb as default file pattern
+# provide a new one with -f (pattern).
+# by jeremy warner, jan 2016
+
+files = "**/*.rb"
+cmd = []
+
+ARGV.each do |a|
+  if a == '-f'
+    fileset = true
+  elsif fileset
+    fileset = false
+    files = a
+  else
+    cmd << a
+  end
+end
+
+if cmd.empty?
+  puts "Please enter a command for fw (filewatcher)."
+else
+  exec "filewatcher '#{files}' 'clear && #{cmd.join ' '}'"
+end
+

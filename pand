@@ -18,13 +18,13 @@ mb=
 help_msg(){
     echo "usage: pand [-opts] <command> <target>"
     echo "Commands:"
-    echo "	dp		doc to pdf"
-    echo "	xp		docx to pdf"
-    echo "	dm		doc to md"
-    echo "	xm		docx to md"
-    echo "	mp		md to pdf"
-    echo "	mt		md to tex"
-    echo "	mb		md to beamer"
+    echo "	dp	doc to pdf"
+    echo "	xp	docx to pdf"
+    echo "	dm	doc to md"
+    echo "	xm	docx to md"
+    echo "	mp	md to pdf"
+    echo "	mt	md to tex"
+    echo "	mb	md to beamer"
     echo "	help	show this list"
     echo "Options:"
     echo "	-d		delete source on completion"
@@ -46,6 +46,13 @@ pandoc_msg(){
 pandocloc=`which pandoc`
 [ $? != 0 ] && pandoc_msg
 
+# linking pand
+link_pand(){
+    here=$(cd "${0%/*}"; pwd)
+    ln -vf "$here/pand" /usr/local/bin/pand
+    exit 1
+}
+
 # parse args
 for arg; do
     if [[ $arg == "dp" ]]; then dp=1
@@ -56,7 +63,7 @@ for arg; do
     elif [[ $arg == "mt" ]]; then mt=1
     elif [[ $arg == "mb" ]]; then mb=1
     elif [[ $arg == "-d" ]]; then delete=1
-    elif [[ $arg == "-s" ]]; then ln -vf pand /usr/local/bin/pand
+    elif [[ $arg == "-s" ]]; then link_pand
     elif [[ $arg == "help" ]]; then help_msg
     elif [[ -z $target ]]; then target="$arg"
     else target="$target $arg"
@@ -64,7 +71,7 @@ for arg; do
 done
 
 # check to see any valid commands matched, else exit
-! [[ $dp || $xp || $mp || $mt || $mb ]] && help_msg
+! [[ $dp || $xp || $dm || $xm || $mp || $mt || $mb ]] && help_msg
 
 # handle pandoc cases below
 
@@ -75,8 +82,8 @@ transform(){
 
 # ms office doc/docx to pdf
 if [[ $dp || $xp ]]; then
-    [ $dp ] && out="`basename $target .doc`.pdf"
-    [ $xp ] && out="`basename $target .docx`.pdf"
+    [ $dp ] && out="${target%.doc}.pdf"
+    [ $xp ] && out="${target%.docx}.pdf"
     pandoc -s "$target" -t markdown -o temp.md
     pandoc temp.md -o "$out"
     rm temp.md
@@ -84,27 +91,27 @@ fi
 
 # ms office doc/docx to markdown
 if [[ $dm || $xm ]]; then
-    [ $dm ] && out="`basename $target .doc`.md"
-    [ $xm ] && out="`basename $target .docx`.md"
+    [ $dm ] && out="${target%.doc}.md"
+    [ $xm ] && out="${target%.docx}.md"
     pandoc -s "$target" -t markdown -o "$out"
 fi
 
 # markdown to pdf or beamer
 if [[ $mp || $mb ]]; then
-    out="`basename $target .md`.pdf"
+    out="${target%.md}.pdf"
     [ $mp ] && transform "$target" "$out"
     [ $md ] && pandoc -t beamer "$target" -o "$out"
 fi
 
 # markdown to tex
 if [[ $mt ]]; then
-    out="`basename $target .md`.tex"
+    out="${target%.md}.tex"
     transform "$target" "$out"
 fi
 
 # tex to markdown
 if [[ $tm ]]; then
-    out="`basename $target .tex`.md"
+    out="${target%.tex}.md"
     transform "$target" "$out"
 fi
 

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+
+# by jeremy warner
+# script to show, and remove all files after a download
+
+
+# where we are
+cwd=`pwd`
+
+# what to look for
+exts=( jpg png nfo txt m3u sfg )
+
+# do the search, show
+for ext in "${exts[@]}"
+do
+    find "$cwd" -type f -iname "*$ext"
+done
+
+# check if user wants to continue
+printf "\n[y/n] Remove these files? "
+read DELETE;
+
+# remove all of these
+if [[ "$DELETE" = "y" ]]
+then
+    for ext in "${exts[@]}"
+    do
+        find "$cwd" -type f -iname "*$ext" -exec rm -v {} \;
+    done
+fi

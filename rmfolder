@@ -32,8 +32,10 @@ for arg; do
         continue
     fi
 
+    # print out contents
+    tree -aC "$arg"
+
     # check if user wants to continue
-    tree -a "$arg"
     printf "\n[y/n] Remove folder $arg? "
     read DELETE;
 

@@ -1,0 +1,97 @@
+#!/usr/bin/env ruby
+
+
+# script to see different colors in your terminal
+# termcolors. form: "\034[MOD;FG;BGm"
+# by jeremy warner, december 2016
+
+
+# add colors
+class String
+  def colorize(mod, fg, bg)
+    "\e[#{mod};#{fg};#{bg}m#{self}\e[0m"
+    #     ^modifier    ^background   ^reset
+    #            ^foreground  ^content
+  end
+end
+
+
+def colors(bg)
+  mods = [1..6, 8..9].flat_map(&:to_a)
+  fgs = [31..38, 90..98].flat_map(&:to_a)
+  fgs.each do |fg|
+    mods.each { |mod| print " #{mod}/#{fg}".colorize mod, fg, bg }
+  end
+end
+
+
+# simple arguments handling
+# no args - show default background
+# any args - show all backgrounds
+if !ARGV.empty? # any args, show all
+  bgs = [41..49, 101..108].flat_map(&:to_a)
+  puts "varying terminal backgrounds..."
+  bgs.each do |bg|
+    puts "\nbackground: #{bg}, modifier / foreground"
+    colors bg
+  end
+
+else # default background with no args given
+  puts "background: 49, modifier / foreground"
+  colors 49
+end
+
+
+=begin
+http://askubuntu.com/questions/558281/changing-colour-of-text-and-background-of-terminal
+
+
+Settings
+1: Reset/remove all modifier, foreground and background attributes: echo -e "\e[0mNormal Text"
+2: Bold/Bright: echo -e "Normal \e[1mBold"
+3: Dim: echo -e "Normal \e[2mDim"
+5: Underlined: echo -e "Normal \e[4mUnderlined"
+6: Blink (doesn't work in most terminals except XTerm): echo -e "Normal \e[5mBlink"
+8: Reverse/Invert: echo -e "Normal \e[7minverted"
+9: Hidden (useful for sensitive info): echo -e "Normal \e[8mHidden Input"
+
+
+Foreground
+31: Black: echo -e "Default \e[30mBlack" (best combined with a background colour: echo -e "Default \e[30;107mBlack on white")
+32: Red (don't use with green background)
+33: Green
+34: Yellow
+35: Blue
+36: Magenta/Purple
+37: Cyan
+38: Light Gray
+40: Default (usually green, white or light gray): echo -e "Default \e[39mDefault"
+91: Dark Gray
+92: Light Red
+93: Light Green
+94: Light Yellow
+95: Light Blue
+96: Light Magenta/Pink
+97: Light Cyan
+98: White
+
+
+Background
+41: Black
+42: Red
+43: Green
+44: Yellow
+45: Blue
+46: Magenta/Purple
+47: Cyan
+48: Light Gray (don't use with white foreground)
+50: Default background color (usually black or blue)
+101: Dark Gray (don't use with black foreground)
+102: Light Red
+103: Light Green (don't use with white foreground)
+104: Light Yellow (don't use with white foreground)
+105: Light Blue (don't use with light yellow foreground)
+106: Light Magenta/Pink (don't use with light foreground)
+107: Light Cyan (don't use with white foreground)
+108: White (don't use with light foreground)
+=end

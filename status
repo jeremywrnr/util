@@ -1,57 +1,72 @@
 #!/bin/bash
 
+
 # status - a git tool by jeremy warner
 # cycle through subfolders, run git status, cleanup
 
-for arg; do
-    if [[ $arg == "-v" ]]; then
-        verbose="true"
-    fi
-done
 
-printf "Starting in $PWD...\n\n"
+# check if verbose
+for arg; do if [[ $arg == "-v" ]]; then verbose="true"; fi; done
 
-# pull in all folders and show all output. good for parsing help
-if [[ $verbose == "true" ]]; then
-    find . -type d -depth 1\
-        -exec printf "{}\n" \;\
-        -exec git --git-dir={}/.git --work-tree"$PWD"/{} status \;\
+
+function git-stat # loop over folders, run git status
+{
+    find . -type d -name ".git"\
+        -exec dirname {} \;\
+        -exec git --git-dir={} --work-tree="$PWD"/{}/.. status \;\
         -exec printf "\n" \;
-    echo "Verbose status complete."
-    exit 0
-fi
-
-find . -type d -depth 1\
-    -exec printf "{}\n" \;\
-    -exec git --git-dir={}/.git --work-tree="$PWD"/{} status \;\
-    -exec printf "\n" \; |\
-sed -n -e "
-/^\.\//{
-    # print out the current repo
-    s_^\.\/\(.*\)_\[\1\]_
-    N
-    # mute git repo error
-    /fatal: Not a git repository/{
-        d
-        b
-    }
-    N
-    # print branch if not master
-    /master/!{
-        s_\(.*\)\nOn branch \(.*\)_\1\ on \2_
-    }
-    /master/{
-        s_\(.*\)\nOn branch master_\1_
-    }
-    s_\(.*\)\nYour branch is up-to-date with .*_\[ok\]\1_
-    N
-    # filter out saying repo is clean if it is
-    s_\(.*\)\nnothing to commit, working directory clean.*_\1_
 }
-/./p
-"
+
+
+# sed terminal colors
+RESET=`echo -e "\033[0;0m"`
+GREEN=`echo -e "\033[0;32m"`
+PURPL=`echo -e "\033[0;35m"`
+CYAN=`echo -e "\033[0;36m"`
+UCYAN=`echo -e "\033[4;36m"`
+
+
+function git-parser # parsing pipeline, clean n color output
+{
+    sed -n -e "
+    /^\.\//{
+        # print out the current repo
+        s_^\.\/\(.*\)_$CYAN\[\1\]${RESET}_
+        N
+        # mute git repo error
+        /fatal: Not a git repository/{
+            d
+            b
+        }
+        N
+        # print branch if not master
+        /master/!{
+            s_\(.*\)\nOn branch \(.*\)_\1\ on \2_
+        }
+        /master/{
+            s_\(.*\)\nOn branch master_\1_
+        }
+        s_\(.*\)\nYour branch is up-to-date with .*_$GREEN\[ok\]$RESET\1_
+        N
+        # filter out saying repo is clean if it is
+        s_\(.*\)\nnothing to commit, working directory clean.*_\1_
+    }
+    # print anything, if we have it
+    /./p
+    "
+}
 
 # how to print a new line in osx sed:
 #s_\(.*\)_\1\\`echo -e '\n\r'`_
 
-printf "\n"
+
+# loop over all folders, run git status
+printf "Starting in $UCYAN$PWD...$RESET\n\n"
+if [[ $verbose == "true" ]]; then
+    git-stat
+else
+    git-stat | git-parser
+fi
+
+# cleanup format
+printf "\n$RESET"
