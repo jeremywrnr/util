@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# from: https://gist.github.com/brianhempel/d12077e6f090c6196ae184dc34f3ade4
+
+HELP_STR = "Usage: $ remove_rightslink_images file1.pdf file2.pdf"
+
+begin
+  require 'hexapdf' # HexaPDF is AGPL licensed according to https://hexapdf.gettalong.org/
+rescue LoadError
+  if system("gem install --no-doc hexapdf")
+    Gem.clear_paths
+    require "hexapdf"
+  else
+    STDERR.puts("Could not install hexapdf. You may have to use sudo: $ sudo gem install --no-doc hexapdf")
+    exit 1
+  end
+end
+
+if ARGV.empty? || ARGV.grep("-h").any? || ARGV.grep("--help").any?
+  STDERR.puts(HELP_STR)
+  exit 1
+end
+
+ARGV.each do |path|
+  pdf = HexaPDF::Document.open(path)
+
+  pdf.pages.each do |page|
+    page.contents = page.contents.gsub(/\nq 110 \d+ \d+ 14 \d+ \d+ cm \/Xi\d+ Do Q/, "")
+  end
+
+  pdf.write(path)
+end

@@ -6,7 +6,6 @@
 printHighlight()
 {
     pygmentize -g "$1"
-    exit 0
 }
 
 testPrereq()
@@ -14,6 +13,7 @@ testPrereq()
     testing="$1"
     type $testing >/dev/null 2>&1 || {
     echo "$testing is not installed, please install before running" >&2
+    echo "pip3 install Pygments"
     exit 1
 }
 }

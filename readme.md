@@ -21,7 +21,7 @@ cw:
 
     print out source code of any script in path
 
-dot:
+srcdot:
 
     source all of my dotfiles to my home folder
 
@@ -32,6 +32,10 @@ dudir:
 fcp:
 
     git add, commit, and push all arguments
+
+git-reset-repo:
+
+    DANGER: get rid of all git commit history, make new repo with single commmit
 
 gac:
 
@@ -65,10 +69,6 @@ remote-setter:
 
     change git remotes to be on github or bb, and ssh or https
 
-reset-repo:
-
-    DANGER: get rid of all git commit history, make new repo with single commmit
-
 rmfolder:
 
     rm a folder even if it is not empty, ls first
@@ -88,10 +88,6 @@ ts:
 vimrc:
 
     script to open up, edit, then commit and src vimrc
-
-vundle-setup:
-
-    install vundle for vim
 
 zshrc-update:
 

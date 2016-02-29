@@ -42,7 +42,6 @@ if [[ $compress ]]; then
     ext=".tar.bz2"
     out="$target$ext"
     tar cvfj "$out" "$target"
-    rmfolder "$target"
 
 elif [[ $decompress ]]; then
     tar -xvf "$target"

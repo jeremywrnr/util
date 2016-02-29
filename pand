@@ -14,22 +14,29 @@ xp=
 mp=
 mt=
 mb=
+tm=
+hm=
 
 help_msg(){
-    echo "usage: pand [-opts] <command> <target>"
+    echo "usage: pand [opts] <command> <target>"
     echo "Commands:"
-    echo "	dp	doc to pdf"
-    echo "	xp	docx to pdf"
-    echo "	dm	doc to md"
-    echo "	xm	docx to md"
-    echo "	mp	md to pdf"
-    echo "	mt	md to tex"
-    echo "	mb	md to beamer"
-    echo "	help	show this list"
+    echo "	dp	doc:pdf"
+    echo "	xp	docx:pdf"
+    echo "	dm	doc:md"
+    echo "	xm	docx:md"
+    echo "	mp	md:pdf"
+    echo "	mt	md:tex"
+    echo "	tm	tex:md"
+    echo "	mb	md:beamer"
+    echo "	hm	html:markdown"
+    echo ""
     echo "Options:"
     echo "	-d		delete source on completion"
     echo "	-s		link pand to /usr/local/bin"
+    echo "	-h		show this help message"
+    echo ""
     echo "pand - a pandoc tool helper"
+    echo ""
     exit 0
 }
 
@@ -50,7 +57,7 @@ pandocloc=`which pandoc`
 link_pand(){
     here=$(cd "${0%/*}"; pwd)
     ln -vf "$here/pand" /usr/local/bin/pand
-    exit 1
+    exit 0
 }
 
 # parse args
@@ -61,17 +68,20 @@ for arg; do
     elif [[ $arg == "xm" ]]; then xm=1
     elif [[ $arg == "mp" ]]; then mp=1
     elif [[ $arg == "mt" ]]; then mt=1
+    elif [[ $arg == "tm" ]]; then tm=1
     elif [[ $arg == "mb" ]]; then mb=1
+    elif [[ $arg == "hm" ]]; then hm=1
     elif [[ $arg == "-d" ]]; then delete=1
     elif [[ $arg == "-s" ]]; then link_pand
-    elif [[ $arg == "help" ]]; then help_msg
+    elif [[ $arg == "-h" ]]; then help_msg
+    elif [[ $arg == "--help" ]]; then help_msg
     elif [[ -z $target ]]; then target="$arg"
     else target="$target $arg"
     fi
 done
 
 # check to see any valid commands matched, else exit
-! [[ $dp || $xp || $dm || $xm || $mp || $mt || $mb ]] && help_msg
+! [[ $dp || $xp || $dm || $xm || $mp || $mt || $tm || $mb || $hm ]] && help_msg
 
 # handle pandoc cases below
 
@@ -113,6 +123,13 @@ fi
 if [[ $tm ]]; then
     out="${target%.tex}.md"
     transform "$target" "$out"
+fi
+
+# tex to markdown, saving non-markdown html
+# https://stackoverflow.com/questions/16248986/
+if [[ $hm ]]; then
+    out="${target%.html}.md"
+    pandoc "$target" -o "$out" --parse-raw
 fi
 
 # delete source if requested

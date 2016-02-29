@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# source:
+# https://gist.github.com/mugifly/9821232eebf8eb5784a8caf74a00e670
+
+set -e
+
+echo -e "Image Converter for Slack Emoji\nNOTICE: The image will be overwritten."
+
+if [ $# -lt 1 ]; then
+	echo "USAGE:"
+	echo -e "  ${0} IMG_FILE [IMG_FILE...]\n"
+	echo "IMG_FILE:"
+	echo -e "  Path of an image file. (e.g. foo.png)\n"
+	exit 1
+fi
+
+
+for imgpath in "$@"; do
+	echo "${imgpath}"
+	mogrify -resize 128x128 -unsharp 2x1.4+0.5+0 -quality 100 -verbose $imgpath
+	echo ""
+done
+
+echo "Done"
+exit 0

@@ -1,15 +1,15 @@
 #!/usr/bin/env zsh
 
-DFPATH=~/GitHub/dotfiles
+DFPATH=~/Documents/Code/dotfiles
 RUNPATH=$(cd "${0%/*}"; pwd)
 
 cd $DFPATH/vim
-vim $DFPATH/vim/mappings.vim +NERDTree
+vim $DFPATH/vim/mappings.vim
 cd $DFPATH
 git add vimrc
 git add vim/*
 git commit -av
-git push origin master
+git push origin main
 echo "Commit complete."
-$RUNPATH/dot
+$RUNPATH/srcdot
 cd -

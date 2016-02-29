@@ -30,7 +30,7 @@ for arg; do
     fi
 done
 
-cmdwrapper="(cd {}/.. && $cmd)"
+cmdwrapper="(cd '{}'/.. && $cmd)"
 
 
 function git-repo-cmd # loop over folders, run users command

@@ -14,7 +14,7 @@ function git-upper # loop over folders, run git up
 {
     find . -type d -name ".git"\
         -exec dirname {} \;\
-        -exec sh -c '(cd "{}/.." && git-up)' \;
+        -exec sh -c '(cd "{}/.." && yes | git-up)' \;
 }
 
 

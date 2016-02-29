@@ -85,7 +85,7 @@ if($lineNum){
 }
 
 # otherwise open up, print all contents
-print "\n$tool - ($path)\n\n";
+print "\n# $tool - ($path)\n\n";
 while(<$TOOLCONTENT>){ print }
 print "\n";
 

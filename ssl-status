@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# https://serverfault.com/questions/589695/
+
+for arg; do
+    echo "" | openssl s_client -showcerts -status -verify 0 \
+        -connect "$arg:443" 2>&1 | \
+        egrep "Verify return|subject=/serial"
+done

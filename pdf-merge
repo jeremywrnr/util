@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+# ruby gs wrapper: merge-pdf
+# by jeremywrnr, jul 2017
+
+inf = [] # input
+out = "merged.pdf"
+
+# option to specify output file
+
+ARGV.each_cons(2) do |arg, next_arg|
+  if arg == '--output' || arg == '-o'
+    if next_arg.nil?
+      help
+    else
+      out = next_arg
+      break
+    end
+  else
+    inf.push arg
+  end
+end
+
+class String
+  def grn() colorize(32,0) end
+  def red() colorize(31,0) end
+  def colorize(color, mod)
+    "\033[#{mod};#{color};49m#{self}\033[0;0m"
+  end
+end
+
+def help
+  puts "usage:"
+  puts "\tmerge-pdf <pdf1> <pdf2> [--output|-o <pdfname>]"
+  puts "i.e.:"
+  puts "\tmerge-pdf 1.pdf 2.pdf # writes to merged.pdf"
+  puts "\tmerge-pdf 1.pdf 2.pdf -o my-special-name.pdf"
+  exit(0)
+end
+
+def good(c)
+  if c.exitstatus > 0
+    puts ("Pdf merge failed: " + c.to_s).red
+  else
+    puts "Pdf merge successful".grn
+  end
+end
+
+if inf.empty?
+  help
+else
+  puts "Starting the pdf merging process...".grn
+  inf = inf.map(&:to_s).map {|s| "'#{s}'" }.join(' ')
+  cmd = "gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile='#{out}' #{inf}"
+  puts cmd
+  system cmd
+  good $?
+end

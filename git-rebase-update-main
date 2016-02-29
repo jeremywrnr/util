@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# git rebase-update-main
+# by jeremywrnr, spring 2017
+
+# run this from your development branch
+branch=`git rev-parse --abbrev-ref HEAD`
+
+# update main branch
+git checkout main
+git pull origin main
+
+# rebase off main
+git checkout $branch
+git rebase main
+
+# push and switch back
+git checkout main
+git merge $branch
+git push origin main
+git checkout $branch

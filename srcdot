@@ -6,7 +6,7 @@
 # -b = backup, -h (options)
 
 # grab all dotfiles
-DFPATH=~/GitHub/dotfiles
+DFPATH=~/Documents/Code/dotfiles
 
 # dynamically load all dotfiles
 dotfiles=$(ls $DFPATH | grep -Ev 'etc|readme|oh-my-zsh|vim$')
@@ -54,4 +54,3 @@ fi
 printf "\nCopying .oh-my zsh, vim folders to home dir...\n\n"
 cp -a $DFPATH/oh-my-zsh/. ~/.oh-my-zsh/
 cp -a $DFPATH/vim/. ~/.vim/
-cp $TOOLPATH/vundle-setup.sh ~/.vim/

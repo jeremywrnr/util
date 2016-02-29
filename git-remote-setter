@@ -1,18 +1,16 @@
-#/bin/bash
+#!/usr/bin/env bash
 
 
 # made by jeremy warner, sep 8 2015
 # convert a git remote (on github) to use https or ssh (pass in)
 # run this in the base directory of the git repo (where .git/ lives)
-
-
 # TODO: auto parse the git repo host website
+
 
 # check if bad args given
 function checkargs
 {
     echo 'usage: remote-setter [gh|bb] [https|ssh]'
-    echo 'error: specify to use either https or ssh, and github [gh] or bit bucket [bb]'
     exit 1
 }
 
@@ -36,7 +34,7 @@ fi
 
 # get current user and repo info
 USER=$(git config --global --get github.user)
-REPO=$(basename `pwd`)
+REPO=$(basename "`pwd`")
 
 if [[ $protocol == 'https' ]]
 then # switching over to https
