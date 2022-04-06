@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# https://github.com/jonnyijapan/pdfify/blob/master/Pdfify.workflow/Contents/document.wflow
+
+for f in "$@"
+do
+    dirname="$(dirname "$f")"
+    basename=$(basename "$f" | cut -d. -f1)
+    output=$dirname/$basename.pdf
+    echo "updating: $output"
+    /usr/local/bin/rsvg-convert -f pdf -o "$output" "$f"
+done

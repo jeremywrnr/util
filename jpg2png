@@ -1,0 +1,21 @@
+#!/bin/bash
+
+convert_jpg_to_png() {
+    echo "Converting $1"
+    basefile=$(basename $1)
+    filename="${basefile%%.*}"
+    convert "$basefile" "${filename}.png"
+}
+
+export -f convert_jpg_to_png
+
+if [ $# -eq 0 ]; then
+    echo "No arguments supplied, converting all jpg/jpeg to png"
+    find . -iname '*.jpg' -exec bash -c 'convert_jpg_to_png "$0"' {} \;
+    find . -iname '*.jpeg' -exec bash -c 'convert_jpg_to_png "$0"' {} \;
+else
+    for f in "$@"; do
+        convert_jpg_to_png "$f"
+    done
+fi
+

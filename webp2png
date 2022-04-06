@@ -1,0 +1,20 @@
+#!/bin/bash
+
+convert_webp_to_png() {
+    echo "Converting $1"
+    basefile=$(basename $1)
+    filename="${basefile%%.*}"
+    convert "$basefile" "${filename}.png"
+}
+
+export -f convert_webp_to_png
+
+if [ $# -eq 0 ]; then
+    echo "No arguments supplied, converting all webp to png"
+    find . -iname '*.webp' -exec bash -c 'convert_webp_to_png "$0"' {} \;
+else
+    for f in "$@"; do
+        convert_webp_to_png "$f"
+    done
+fi
+

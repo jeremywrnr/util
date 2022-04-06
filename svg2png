@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for f in "$@"
+do
+    dirname="$(dirname "$f")"
+    basename=$(basename "$f" | cut -d. -f1)
+    output_pdf=$dirname/$basename.pdf
+    output_png=$dirname/$basename.png
+    echo "Generating: $output_png"
+    /usr/local/bin/rsvg-convert -f pdf -o "$output_pdf" "$f"
+    /usr/local/bin/pdftoppm -png "$output_pdf" > "$output_png"
+    rm "$output_pdf"
+done
+
