@@ -1,7 +1,11 @@
 #!/usr/bin/env zsh
 
+alias inkscape=/Applications/Inkscape.app/Contents/MacOS/inkscape
 
 # Source: https://gist.github.com/WebReflection/b5ab5f1eca311b76835c
+
+# This is a combination of 5 commits.
+# This is the 1st commit message:
 
 createsvg() {
   local margin="$1"
