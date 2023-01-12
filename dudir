@@ -5,12 +5,25 @@
 
 # check cl args: -r = copy, -h message
 RECURSE="false"
+SORTFILE="false"
+FILES="false"
 for arg; do
     if [[ "$arg" = "-r" ]]; then
         RECURSE="true"
+    elif [[ "$arg" = "-f" ]]; then
+        FILES="true"
+    elif [[ "$arg" = "-fr" ]]; then
+        FILES="true"
+        RECURSE="true"
+    elif [[ "$arg" = "-rf" ]]; then
+        FILES="true"
+        RECURSE="true"
+    elif [[ "$arg" = "-sf" ]]; then
+        SORTFILE="true"
     elif [[ "$arg" = "-h" ]]; then
         printf "dudir - folder sizing tool usage:\n"
-        printf "\t-r recursively sie folders/content\n"
+        printf "\t-r recursively size folders/content\n"
+        printf "\t-f list files along with folders\n"
         printf "\t-h display this message\n"
         exit 1
     fi
@@ -25,10 +38,35 @@ RESET=`echo -e "\033[0;0m"`
 
 function sizer # get size of folders/files given a directory
 {
-    echo "$UCYAN[mb]$RESET	${UCYAN}($1)$RESET"
-    du -smc $1/* | sort -nr | colorer
-    echo
+    targets=
+    if [[ $FILES == "true" ]]; then
+        echo "$UCYAN[mb]$RESET	${UCYAN}($1)$RESET"
+        targets="$1/*"
+        du -smc $targets | sort -nr | colorer
+    else
+        # to ignore dotfiles:
+        #folders=$(find $1 -type d -depth 1 | grep -v '^\./\.')
+        folders=$(find $1 -type d -depth 1 -not -empty | sed -e "s_^\./__")
+        OUTPUT=""
+        for folder in ${folders[@]}; do
+            FSIZE=`du -ms "$folder" | grep -o '[0-9]\+' | xargs`
+            FCOUNT=`find "$folder" -type f | wc -l | xargs`
+            OUTPUT+="$FSIZE\t$FCOUNT\t$folder\n"
+        done
+
+        # https://stackoverflow.com/questions/11967776/swap-two-columns-awk-sed-python-perl
+        if [[ $SORTFILE == "true" ]]; then
+            echo "$UCYAN[#f]$RESET	${UCYAN}[mb]$RESET	${UCYAN}[$1]$RESET"
+            printf $OUTPUT | awk '{sum2+=$1; sum1+=$2}END{print sum1, sum2}' | sed -e "s/ /\t/g" | colorer
+            printf $OUTPUT | awk ' { t = $1; $1 = $2; $2 = t; print; } ' | sed -e "s/ /\t/g" | sort -nr | colorer
+        else
+            echo "$UCYAN[mb]$RESET	${UCYAN}[#f]$RESET	${UCYAN}[$1]$RESET"
+            printf $OUTPUT | awk '{sum1+=$1; sum2+=$2}END{print sum1, sum2}' | sed -e "s/ /\t/g" | colorer
+            echo -e $OUTPUT | sort -nr | colorer
+        fi
+    fi
 }
+
 
 function colorer # color the size of the folder/item
 {
@@ -37,12 +75,13 @@ function colorer # color the size of the folder/item
         s_^\([0-9][0-9]*\)_$GREEN\1${RESET}_g
     }
     s_\(total\)_$UGRN\1${RESET}_g
+    s_\(total\)_$UGRN\1${RESET}_g
     "
 }
 
 # inform of base, recursion
-echo "root dir: $UCYAN$(pwd)$RESET"
-echo "recursion: $UCYAN$RECURSE$RESET"
+echo "base: $UCYAN$(pwd)$RESET"
+echo "recurse: $UCYAN$RECURSE$RESET, listFiles: $UCYAN$FILES$RESET"
 echo
 
 # get all folders, size
@@ -53,6 +92,8 @@ if [[ $RECURSE == "true" ]]; then
         sizer $folder
     done
 
-else # just size pwd
+else # just use pwd
+
     sizer .
+
 fi
