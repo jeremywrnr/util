@@ -48,7 +48,7 @@ function sizer # get size of folders/files given a directory
 
         # to ignore dotfiles:
         #folders=$(find $1 -type d -depth 1 | grep -v '^\./\.')
-        folders=$(find "$1" -type d -depth 1 -not -empty | sed -e "s_^\./__")
+        folders=$(find "$1" -type d -depth 1 -not -empty 2> /dev/null | sed -e "s_^\./__")
         while read folder; do
             FSIZE=`du -ms "$folder" 2> /dev/null | grep -o '^[0-9]\+' | xargs`
             FCOUNT=`find "$folder" -type f | wc -l | xargs`
@@ -91,7 +91,8 @@ echo
 # get all folders, size
 if [[ $RECURSE == "true" ]]; then
 
-    folders=$(find . -type d | grep -v '^\./\.')
+    #folders=$(find . -type d | grep -v '^\./\.')
+    folders=$(find . -type d -not -empty 2> /dev/null | sed -e "s_^\./__")
     for folder in ${folders[@]}; do
         sizer $folder
     done
