@@ -12,7 +12,7 @@ fi
 
 if [ -d "$dir" ]; then
     echo "Searching: $dir"
-    find "$dir" -type f -iname .DS_Store -depth 2 -exec rm -v {} \;
+    find "$dir" -type f -iname .DS_Store -maxdepth 2 -exec rm -v {} \;
 else
     echo "directory $dir does not exist"
 fi
