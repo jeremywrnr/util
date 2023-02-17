@@ -24,6 +24,7 @@ for arg; do
         printf "dudir - folder sizing tool usage:\n"
         printf "\t-r recursively size folders/content\n"
         printf "\t-f list files along with folders\n"
+        printf "\t-sf sort by file count (high to low)\n"
         printf "\t-h display this message\n"
         exit 1
     fi

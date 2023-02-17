@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-DFPATH=$HOME/Documents/Code/dotfiles
+DFPATH=$HOME/Code/dotfiles
 
 cd $DFPATH
 vim zshrc

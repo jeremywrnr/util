@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-DFPATH=~/Documents/Code/dotfiles
+DFPATH=~/Code/dotfiles
 RUNPATH=$(cd "${0%/*}"; pwd)
 
 cd $DFPATH/vim

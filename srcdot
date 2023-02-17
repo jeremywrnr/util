@@ -6,7 +6,7 @@
 # -b = backup, -h (options)
 
 # grab all dotfiles
-DFPATH=~/Documents/Code/dotfiles
+DFPATH=~/Code/dotfiles
 
 # dynamically load all dotfiles
 dotfiles=$(ls $DFPATH | grep -Ev 'etc|readme|oh-my-zsh|vim$')
