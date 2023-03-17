@@ -8,14 +8,13 @@ out = "merged.pdf"
 
 # option to specify output file
 
-ARGV.each_cons(2) do |arg, next_arg|
+read_output = false
+ARGV.each do |arg, next_arg|
   if arg == '--output' || arg == '-o'
-    if next_arg.nil?
-      help
-    else
-      out = next_arg
-      break
-    end
+    read_output = true
+  elsif read_output
+    out = next_arg
+    break
   else
     inf.push arg
   end
@@ -31,7 +30,7 @@ end
 
 def help
   puts "usage:"
-  puts "\tmerge-pdf <pdf1> <pdf2> [--output|-o <pdfname>]"
+  puts "\tmerge-pdf <pdf1> <pdf2> ... [--output|-o <pdfname>]"
   puts "i.e.:"
   puts "\tmerge-pdf 1.pdf 2.pdf # writes to merged.pdf"
   puts "\tmerge-pdf 1.pdf 2.pdf -o my-special-name.pdf"
