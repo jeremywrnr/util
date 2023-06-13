@@ -1,55 +1,36 @@
 #!/usr/bin/env bash
 
-
-# made by jeremy warner, sep 8 2015
 # convert a git remote (on github) to use https or ssh (pass in)
 # run this in the base directory of the git repo (where .git/ lives)
-# TODO: auto parse the git repo host website
 
-
-# check if bad args given
 function checkargs
 {
-    echo 'usage: remote-setter [gh|bb] [https|ssh]'
+    echo 'usage: remote-setter [https|ssh]'
     exit 1
 }
 
 # wrong number args (not 2) given
-[[ $# != 2 ]] && checkargs
+[[ $# != 1 ]] && checkargs
 
 # parsing command line arguments
-HOST=''
-hosting="$1" # either github or bb
-protocol="$2" # either ssh or https
-if [[ $hosting == 'bb' || $hosting == 'bitbucket' ]]
-then # bitbucket is host
-    HOST='bitbucket.com'
-
-elif [[ $hosting == 'gh' || $hosting == 'github' ]]
-then # github is host
-    HOST='github.com'
-
-fi
-
+HOST='github.com' # TODO: autodetect this
+protocol="$1" # either ssh or https
 
 # get current user and repo info
-USER=$(git config --global --get github.user)
+USER=$(git config --global --get user.user)
 REPO=$(basename "`pwd`")
 
-if [[ $protocol == 'https' ]]
-then # switching over to https
+if [[ $protocol == 'https' ]]; then # switching over to https
     git remote set-url origin https://$HOST/$USER/$REPO.git
-
-elif [[ $protocol == 'ssh' ]]
-then # switching over to ssh
+elif [[ $protocol == 'ssh' ]]; then # switching over to ssh
     git remote set-url origin git@$HOST:$USER/$REPO.git
-
 else # strange things are happening
     checkargs
 fi
 
 # show new remote URL
-echo user: $USER
-echo repo: $REPO
-echo new remotes:
+#echo user: $USER
+#echo repo: $REPO
+echo New remotes:
 git remote -v
+
