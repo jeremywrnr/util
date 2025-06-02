@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'colored'
+require 'filewatcher'
 
 # fw - filewatcher helper
 # starting filewatcher w/ clear
@@ -69,7 +70,10 @@ elsif cmds.first == '-h'
 else # multipart command given
   cmd = cmds.join ' '
   banner =  'executing: '.green << cmd << "\non saving: ".green << files
-  puts banner
-  exec "filewatcher", files, "clear && echo '#{banner}' && #{cmd}"
+  sep = "-" * 80
+  Filewatcher.new(files).watch do |changes|
+    system "echo '#{banner}' && #{cmd}"
+    puts sep
+  end
 end
 
