@@ -10,4 +10,4 @@ sudo sntp -sS time.apple.com
 # sudo ntpdate -s time.apple.com
 
 # Log the sync attempt
-echo "$(date): Time sync attempted" >> ~/Library/Logs/time_sync.log
+echo "$(date): Time sync attempted" >> /var/log/time_sync.log
