@@ -1,0 +1,1 @@
+rdfind -dryrun true .
