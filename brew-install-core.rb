@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
 core = %w{
+vim
+git
+curl
 fasd
 tree
 tmux
