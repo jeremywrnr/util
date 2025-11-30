@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""
+Convert BMP and GIF images to JPG format with optional quality settings.
+For animated GIFs, extracts the first frame.
+Optionally delete source files after successful conversion.
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+import click
+from PIL import Image
+
+
+def convert_image_to_jpg(image_file, quality=95, delete_source=True, output_dir=None):
+    """
+    Convert a BMP or GIF file to JPG.
+    
+    Args:
+        image_file: Path to BMP or GIF file
+        quality: JPEG quality (1-100, higher is better)
+        delete_source: If True, delete source file after successful conversion
+        output_dir: Optional output directory (default: same as source)
+    
+    Returns:
+        True if conversion successful, False otherwise
+    """
+    image_path = Path(image_file)
+    
+    if not image_path.exists():
+        click.echo(f"Error: File not found: {image_file}", err=True)
+        return False
+    
+    # Determine output path
+    if output_dir:
+        output_path = Path(output_dir) / image_path.with_suffix('.jpg').name
+    else:
+        output_path = image_path.with_suffix('.jpg')
+    
+    # Check if output already exists
+    if output_path.exists():
+        click.echo(f"Warning: Output file already exists: {output_path}", err=True)
+        if not click.confirm("Overwrite?"):
+            return False
+    
+    click.echo(f"Converting: {image_path.name} -> {output_path.name}")
+    
+    try:
+        # Open and convert
+        with Image.open(image_path) as img:
+            # For animated GIFs, use first frame
+            if image_path.suffix.lower() == '.gif':
+                try:
+                    # Check if animated
+                    img.seek(1)
+                    click.echo(f"  Note: Animated GIF detected, extracting first frame")
+                    img.seek(0)
+                except EOFError:
+                    # Not animated, single frame
+                    pass
+            
+            # Convert to RGB if needed
+            if img.mode in ('RGBA', 'LA', 'P'):
+                # Create white background
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                # Paste with alpha mask if available
+                if img.mode in ('RGBA', 'LA'):
+                    background.paste(img, mask=img.split()[-1])
+                else:
+                    background.paste(img)
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # Save as JPEG
+            img.save(output_path, 'JPEG', quality=quality, optimize=True)
+        
+        # Verify output file was created
+        if not output_path.exists() or output_path.stat().st_size == 0:
+            click.echo(f"Error: Output file not created or is empty: {output_path}", err=True)
+            return False
+        
+        # Show file sizes
+        original_size = image_path.stat().st_size / (1024 * 1024)  # MB
+        new_size = output_path.stat().st_size / (1024 * 1024)  # MB
+        click.echo(f"✓ Successfully converted: {output_path}")
+        click.echo(f"  Size: {original_size:.2f} MB → {new_size:.2f} MB ({new_size/original_size*100:.1f}%)")
+        
+        # Delete source file if requested
+        if delete_source:
+            try:
+                image_path.unlink()
+                click.echo(f"✓ Deleted source file: {image_path}")
+            except Exception as e:
+                click.echo(f"Warning: Could not delete source file: {e}", err=True)
+        
+        return True
+        
+    except Exception as e:
+        click.echo(f"Error converting {image_file}: {e}", err=True)
+        return False
+
+
+@click.command()
+@click.argument('files', nargs=-1, required=True, type=click.Path(exists=True))
+@click.option(
+    '--quality',
+    '-q',
+    type=click.IntRange(1, 100),
+    default=95,
+    help='JPEG quality (1-100, higher is better, default: 95)',
+)
+@click.option(
+    '--keep-source',
+    is_flag=True,
+    help='Keep original files after conversion (default: delete them)',
+)
+@click.option(
+    '--output-dir',
+    '-o',
+    type=click.Path(file_okay=False, dir_okay=True),
+    help='Output directory (default: same as source file)',
+)
+def main(files, quality, keep_source, output_dir):
+    """
+    Convert BMP and GIF images to JPG format.
+    
+    For animated GIFs, extracts the first frame only.
+    By default, source files are deleted after successful conversion.
+    
+    \b
+    Examples:
+      # Convert all BMP and GIF files
+      image-to-jpg *.bmp *.gif
+      
+      # Convert and keep source files
+      image-to-jpg *.bmp --keep-source
+      
+      # Convert with specific quality
+      image-to-jpg *.gif --quality 90
+      
+      # Convert to specific output directory
+      image-to-jpg *.bmp *.gif --output-dir /path/to/output
+      
+      # Lower quality for smaller file sizes
+      image-to-jpg *.gif --quality 85
+    """
+    # Create output directory if specified
+    if output_dir:
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Filter to only BMP and GIF files
+    valid_files = [f for f in files if f.lower().endswith(('.bmp', '.gif'))]
+    
+    if not valid_files:
+        click.echo("Error: No BMP or GIF files found in input", err=True)
+        sys.exit(1)
+    
+    # Count by type
+    bmp_count = sum(1 for f in valid_files if f.lower().endswith('.bmp'))
+    gif_count = sum(1 for f in valid_files if f.lower().endswith('.gif'))
+    
+    click.echo(f"Converting {len(valid_files)} file(s) to JPG ({bmp_count} BMP, {gif_count} GIF)...\n")
+    
+    # Convert each file
+    successful = 0
+    failed = 0
+    
+    for image_file in valid_files:
+        if convert_image_to_jpg(
+            image_file,
+            quality=quality,
+            delete_source=not keep_source,
+            output_dir=output_dir
+        ):
+            successful += 1
+        else:
+            failed += 1
+        click.echo()  # Blank line between files
+    
+    # Summary
+    click.echo(f"\nConversion complete:")
+    click.echo(f"  ✓ Successful: {successful}")
+    if failed > 0:
+        click.echo(f"  ✗ Failed: {failed}")
+    
+    sys.exit(0 if failed == 0 else 1)
+
+
+if __name__ == "__main__":
+    main()

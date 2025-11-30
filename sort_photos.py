@@ -204,6 +204,18 @@ def sort_media(input_folder, output_folder, photo, video, move, inline, force, d
                 shutil.move(str(item), str(dest))
             
             click.echo(f"✓ Files successfully organized in place at {original_input}")
+            
+            # Clean up empty directories after moving files
+            click.echo("\nCleaning up empty directories...")
+            try:
+                subprocess.run(
+                    ['find', original_input, '-type', 'd', '-empty', '-delete'],
+                    check=True,
+                    capture_output=True
+                )
+                click.echo("✓ Empty directories removed")
+            except subprocess.CalledProcessError:
+                click.echo("⚠ Warning: Could not remove some empty directories", err=True)
         
         # Always clean up temp directory if it was created
         if temp_dir and Path(temp_dir).exists():
