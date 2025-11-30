@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""
+Recursively count files by their extension.
+By default, counts files in the current directory.
+If arguments are provided, counts files in those directories as well.
+"""
+
+import os
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+
+def count_files_by_extension(directory):
+    """
+    Recursively count files by extension in the given directory.
+    
+    Args:
+        directory: Path to the directory to scan
+        
+    Returns:
+        dict: Dictionary mapping extensions to file counts
+    """
+    extension_counts = defaultdict(int)
+    
+    try:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                # Get file extension (including the dot)
+                ext = Path(file).suffix.lower()
+                
+                # Use '(no extension)' for files without extensions
+                if not ext:
+                    ext = '(no extension)'
+                
+                extension_counts[ext] += 1
+                
+    except PermissionError as e:
+        print(f"Warning: Permission denied for {directory}: {e}", file=sys.stderr)
+    except Exception as e:
+        print(f"Warning: Error scanning {directory}: {e}", file=sys.stderr)
+    
+    return extension_counts
+
+
+def print_results(directory, counts):
+    """Print the file count results for a directory."""
+    print(f"\n{'='*60}")
+    print(f"Directory: {os.path.abspath(directory)}")
+    print(f"{'='*60}")
+    
+    if not counts:
+        print("No files found.")
+        return
+    
+    # Sort by count (descending), then by extension name
+    sorted_counts = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+    
+    # Calculate column widths
+    max_ext_len = max(len(ext) for ext in counts.keys())
+    max_count_len = max(len(str(count)) for count in counts.values())
+    
+    # Print header
+    print(f"\n{'Extension':<{max_ext_len}}  {'Count':>{max_count_len}}")
+    print(f"{'-'*max_ext_len}  {'-'*max_count_len}")
+    
+    # Print counts
+    total = 0
+    for ext, count in sorted_counts:
+        print(f"{ext:<{max_ext_len}}  {count:>{max_count_len}}")
+        total += count
+    
+    print(f"{'-'*max_ext_len}  {'-'*max_count_len}")
+    print(f"{'TOTAL':<{max_ext_len}}  {total:>{max_count_len}}")
+
+
+def main():
+    """Main function to handle command-line arguments and orchestrate counting."""
+    # Directories to scan (default is current directory)
+    directories = ['.']
+    
+    # If arguments provided, use those instead/as well
+    if len(sys.argv) > 1:
+        directories = sys.argv[1:]
+    
+    # Count files in each directory
+    for directory in directories:
+        if not os.path.exists(directory):
+            print(f"Error: Directory '{directory}' does not exist.", file=sys.stderr)
+            continue
+        
+        if not os.path.isdir(directory):
+            print(f"Error: '{directory}' is not a directory.", file=sys.stderr)
+            continue
+        
+        counts = count_files_by_extension(directory)
+        print_results(directory, counts)
+
+
+if __name__ == '__main__':
+    main()
