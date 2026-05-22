@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for f in "$@"; do
+    [[ "$f" != *.qta ]] && continue
+    ffmpeg -i "$f" -codec:a libmp3lame -qscale:a 2 "${f%.qta}.mp3"
+done
