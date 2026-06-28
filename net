@@ -17,15 +17,20 @@ GetOptions (
 ) or die("Error in command line arguments\n");
 my $rate = $period / 1000.0;
 
-# check current network connection
-# q - quiet, c - packet count, t - timeout
-# TODO add options to customize these parameters too
-my $net = "ping -c 1 -t 1 google.com 2>&1 >/dev/null";
+# ping timeout flag differs by OS: -t on macOS, -W on Linux
+my $timeout_flag = ($^O eq 'darwin') ? '-t' : '-W';
+my $net = "ping -c 1 $timeout_flag 1 8.8.8.8 2>&1 >/dev/null";
 
-# get current network information (NOT PORTABLE)
-my $wifi = `networksetup -getairportnetwork en0`;
-$wifi =~ s/.*: //;
+# get current wifi network name (OS-specific)
+my $wifi;
+if ($^O eq 'darwin') {
+    $wifi = `networksetup -getairportnetwork en0`;
+    $wifi =~ s/.*: //;
+} else {
+    $wifi = `iwgetid -r 2>/dev/null || nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d: -f2`;
+}
 chomp($wifi);
+$wifi ||= 'unknown';
 
 # first time entering loop
 print "Testing $wifi...\n";
